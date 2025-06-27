@@ -1,0 +1,13 @@
+services:
+  ml_db:
+    image: ghcr.io/postgresml/postgresml:2.10.0
+    ports:
+      - "5433:5432"
+      - "8000:8000"
+    volumes:
+      - ./tmp/db:/var/lib/postgresql
+  kafka:
+    image: bashj79/kafka-kraft
+    ports:
+      - "9092:9092"
+    restart: unless-stopped
