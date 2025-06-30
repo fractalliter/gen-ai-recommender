@@ -9,16 +9,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class MessageService(val vectorStore: VectorStore, val jdbcTemplate: JdbcTemplate) {
-    private val promptText = """
-                Answer the following question based on the provided context.
-                If the answer is not found in the context, please state that you don't have enough information.
-
-                Context:
-                {context}
-
-                Question:
-                {query}
-                """
 
     fun getMessages(prompt: String, limit: Int): String? {
          val searchRequest = SearchRequest.builder()
