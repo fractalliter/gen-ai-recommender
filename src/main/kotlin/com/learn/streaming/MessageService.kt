@@ -21,26 +21,22 @@ class MessageService(val vectorStore: VectorStore, val jdbcTemplate: JdbcTemplat
                 """
 
     fun getMessages(prompt: String, limit: Int): String? {
-        val similarDocuments = vectorStore.similaritySearch(
-            SearchRequest.builder()
-                .query(prompt).topK(limit)
-                .build()
-        )
-        if (similarDocuments == null) return null
-        val context: String? = similarDocuments
-            .joinToString("\n\n") { it.text.toString() }
-        val promptTemplate = PromptTemplate(promptText)
-        val render = promptTemplate.render(
-            mapOf(
-                "context" to context,
-                "query" to prompt
+         val searchRequest = SearchRequest.builder()
+            .query(prompt).topK(limit)
+            .build()
+        val similarDocuments: List<Document>? = vectorStore.similaritySearch(searchRequest)
+        if (similarDocuments.isNullOrEmpty()) return null
+        val context = similarDocuments.filter { it.isText }.sortedBy { it.score }.mapNotNull { it.text }
+        val sql = """
+            SELECT pgml.transform(
+                task   => '{
+                 "task": "summarization",
+                 "model": "facebook/bart-large-cnn"
+               }'::JSONB, 
+                inputs => ARRAY${context.joinToString(prefix = "['", postfix = "']", separator = "', '"){ it.replace("'", "''") }.trimIndent()},
+                args => '{"max_new_tokens": 25}'::JSONB
             )
-        )
-        val sql = "SELECT pgml.transform('summarization', ?)"
-        return jdbcTemplate.queryForObject(
-            sql,
-            String::class.java,
-            render
-        )
+            """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, String::class.java)
     }
 }
