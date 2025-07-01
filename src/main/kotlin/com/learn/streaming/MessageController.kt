@@ -16,9 +16,8 @@ class MessageController(
 
     @PostMapping("/ingest")
     fun post(@RequestBody message: Message): ResponseEntity<Message> {
-        val future = kafkaTemplate.send(topic.name(), message)
         return try {
-            val result = future.get()
+            val result = kafkaTemplate.send(topic.name(), message).get()
             ResponseEntity(result.producerRecord.value(), HttpStatus.CREATED)
         } catch (_: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
@@ -29,8 +28,5 @@ class MessageController(
     fun recommend(
         @RequestParam("prompt") prompt: String,
         @RequestParam("size") size: Int
-    ): ResponseEntity<Result?> {
-        val result = messageService.getMessages(prompt, size)
-        return ResponseEntity.ok(result)
-    }
+    ) = ResponseEntity.ok(messageService.getMessages(prompt, size))
 }
