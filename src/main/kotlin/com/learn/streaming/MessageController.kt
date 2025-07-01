@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/")
 class MessageController(
-    val kafkaTemplate: KafkaTemplate<String, Message>,
-    val topic: NewTopic,
-    val messageService: MessageService
+    private val kafkaTemplate: KafkaTemplate<String, Message>,
+    private val topic: NewTopic,
+    private val messageService: MessageService
 ) {
 
     @PostMapping("/ingest")
@@ -26,7 +26,10 @@ class MessageController(
     }
 
     @GetMapping("/recommend")
-    fun recommend(@RequestParam("prompt") prompt: String, @RequestParam("size") size: Int): ResponseEntity<String?> {
+    fun recommend(
+        @RequestParam("prompt") prompt: String,
+        @RequestParam("size") size: Int
+    ): ResponseEntity<Result?> {
         val result = messageService.getMessages(prompt, size)
         return ResponseEntity.ok(result)
     }
