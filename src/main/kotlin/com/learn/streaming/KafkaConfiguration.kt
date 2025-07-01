@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.KafkaAdmin
 
 @Configuration
-class KafkaConfiguration(@Value("\${spring.kafka.bootstrap-servers}") val bootstrapServers: String) {
+class KafkaConfiguration(
+    @Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
+    @Value("\${spring.kafka.ingest-topic}") private val topic: String,
+) {
 
     @Bean
     fun kafkaAdmin(): KafkaAdmin {
@@ -23,6 +26,6 @@ class KafkaConfiguration(@Value("\${spring.kafka.bootstrap-servers}") val bootst
 
     @Bean
     fun topic1(): NewTopic {
-        return NewTopic("topic1", 1, 1.toShort())
+        return NewTopic(topic, 1, 1.toShort())
     }
 }

@@ -8,11 +8,11 @@ This is a backend for a Generative AI recommender that includes:
 ## Structure of the Project
 
 Project has two endpoints:
-- `/ingest` where receives a message and put it into a Kafka topic
-- `/recommend` where serves a prompt and query similar data in vector store by considering `cosine distance`
+- `/ingest` receives a message and puts it into a Kafka topic
+- `/recommend` serves a prompt and queries similar data in vector store by considering `cosine distance`
 
-And a Kafka listener which listens to a topic for messages for ingestion and generate an embedding for storing in Vectore store.
-Vector store uses PostgresML to generate the embeddings of the messages and store it in Postgres Database.
+And a Kafka listener which listens to a topic for messages for ingestion and generates an embedding for storing in Vectore store.
+Vector store uses PostgresML to generate the embeddings of the messages and stores it in Postgres Database.
 
 ## How to run
 
@@ -49,8 +49,31 @@ To clean up after:
 docker compose down -v
 ```
 
+## Architecture diagram
+
+```mermaid
+graph TD
+    A[MessageController] -->|POST /ingest| D[Kafka Topic]
+    A[MessageController] -->|GET /recommend| C[MessageService]
+    B -->|Creates embeddings and Store in Vectore Store| E[PostgresML PGVector]
+    D -->|Consumes Messages| B[StreamingListener]
+    C -->|1.Queries Vector similarities| E
+    C -->|2.Summarizes the Vectors| E
+
+    subgraph Spring Boot Application
+        A
+        B
+        C
+    end
+
+    subgraph External Services
+        D
+        E
+    end
+```
+
 ### TODO
 - [ ] add tests
 - [ ] dockerize project
 - [ ] github actions
-- [ ] architecture diagram
+- [x] architecture diagram

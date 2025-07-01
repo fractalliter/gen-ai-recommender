@@ -12,7 +12,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 
 @EnableKafka
 @Configuration
-class KafkaConsumerConfiguration(@Value("\${spring.kafka.bootstrap-servers}") val bootstrapServers: String) {
+class KafkaConsumerConfiguration(@Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String) {
 
     @Bean
     fun consumerFactory(): ConsumerFactory<String, Message> {
