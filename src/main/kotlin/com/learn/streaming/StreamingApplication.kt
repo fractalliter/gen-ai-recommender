@@ -11,7 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener
 class StreamingApplication(val vectorStore: VectorStore) {
 
     @KafkaListener(
-        topics = ["topic1"],
+        topics = ["\${spring.kafka.ingest-topic}"],
         groupId = "group_id",
         containerFactory = "concurrentKafkaListenerContainerFactory"
     )
